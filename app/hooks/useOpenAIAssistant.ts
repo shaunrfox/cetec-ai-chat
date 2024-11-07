@@ -17,16 +17,28 @@ export function useOpenAIAssistant(): UseOpenAIAssistant {
   const [messages, setMessages] = useState<Message[]>([]);
   const [status, setStatus] = useState<'idle' | 'in_progress'>('idle');
   const [error, setError] = useState<string | null>(null);
+  const [threadId, setThreadId] = useState<string | null>(null);
 
   const submitMessage = useCallback(async (content: string) => {
     setStatus('in_progress');
     setError(null);
 
+    // Add user message immediately
+    const userMessage = {
+      id: Date.now().toString(),
+      role: 'user' as const,
+      content
+    };
+    setMessages(prev => [...prev, userMessage]);
+
     try {
       const response = await fetch('/api/chat', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ messages: [{ content, role: 'user' }] })
+        body: JSON.stringify({ 
+          messages: [...messages, userMessage],
+          threadId 
+        })
       });
 
       if (!response.ok) {
@@ -36,7 +48,6 @@ export function useOpenAIAssistant(): UseOpenAIAssistant {
       const reader = response.body?.getReader();
       if (!reader) throw new Error('No response stream');
 
-      // Handle SSE response
       const decoder = new TextDecoder();
       while (true) {
         const { done, value } = await reader.read();
@@ -51,6 +62,7 @@ export function useOpenAIAssistant(): UseOpenAIAssistant {
             if (data.status) {
               setStatus(data.status === 'completed' ? 'idle' : 'in_progress');
             } else if (data.role === 'assistant') {
+              setThreadId(data.threadId);
               setMessages(prev => [...prev, {
                 id: data.id,
                 role: data.role,
@@ -65,7 +77,7 @@ export function useOpenAIAssistant(): UseOpenAIAssistant {
     } finally {
       setStatus('idle');
     }
-  }, []);
+  }, [messages, threadId]);
 
   return { messages, status, error, submitMessage };
 }
