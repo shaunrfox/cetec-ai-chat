@@ -4,6 +4,7 @@ interface Message {
   id: string;
   role: 'user' | 'assistant';
   content: string;
+  createdAt: string | Date;
 }
 
 interface UseOpenAIAssistant {
@@ -27,7 +28,8 @@ export function useOpenAIAssistant(): UseOpenAIAssistant {
     const userMessage = {
       id: Date.now().toString(),
       role: 'user' as const,
-      content
+      content,
+      createdAt: new Date()
     };
     setMessages(prev => [...prev, userMessage]);
 
@@ -66,7 +68,8 @@ export function useOpenAIAssistant(): UseOpenAIAssistant {
               setMessages(prev => [...prev, {
                 id: data.id,
                 role: data.role,
-                content: data.content
+                content: data.content,
+                createdAt: new Date()
               }]);
             }
           }

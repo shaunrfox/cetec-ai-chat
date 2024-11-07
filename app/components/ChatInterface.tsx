@@ -5,6 +5,7 @@ import { Button } from "~/components/ui/button";
 import { Card, CardContent, CardFooter, CardHeader, CardTitle } from "~/components/ui/card";
 import { Input } from "~/components/ui/input";
 import { ScrollArea } from "~/components/ui/scroll-area";
+import { format } from 'date-fns';
 
 export function ChatInterface() {
   const [input, setInput] = useState('');
@@ -34,8 +35,13 @@ export function ChatInterface() {
                   : 'bg-green-50 text-green-900'
               }`}
             >
-              <div className="font-semibold mb-1">
-                {message.role === 'assistant' ? 'Cetec Support Bot' : 'You'}
+              <div className="flex justify-between items-center mb-1">
+                <span className="font-semibold">
+                  {message.role === 'assistant' ? 'Cetec Support Bot' : 'You'}
+                </span>
+                <span className="text-xs text-gray-500">
+                  {format(new Date(message.createdAt || Date.now()), 'MMM d, h:mm a')}
+                </span>
               </div>
               <div className="prose prose-sm max-w-none dark:prose-invert">
                 {message.role === 'assistant' ? (
@@ -78,7 +84,14 @@ export function ChatInterface() {
             </div>
           ))}
           {status === 'in_progress' && (
-            <div className="text-gray-500 p-3">AI is thinking...</div>
+            <div className="flex items-center space-x-2 text-gray-500 p-3">
+              <div className="animate-pulse flex space-x-1">
+                <div className="h-2 w-2 bg-gray-400 rounded-full"></div>
+                <div className="h-2 w-2 bg-gray-400 rounded-full animation-delay-200"></div>
+                <div className="h-2 w-2 bg-gray-400 rounded-full animation-delay-400"></div>
+              </div>
+              <span>AI is thinking...</span>
+            </div>
           )}
           {error && (
             <div className="text-red-500 mt-2 p-3">Error: {error}</div>
