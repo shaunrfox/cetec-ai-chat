@@ -1,5 +1,7 @@
 import type { MetaFunction } from "@remix-run/node";
 import { ChatInterface } from "~/components/ChatInterface";
+import { useEffect } from "react";
+import { testDatabase } from "~/db/database";
 
 export const meta: MetaFunction = () => {
   return [
@@ -9,6 +11,10 @@ export const meta: MetaFunction = () => {
 };
 
 export default function Index() {
+  useEffect(() => {
+    // testDatabase();
+  }, []);
+
   return (
     <div className="container mx-auto p-0">
       <ChatInterface />

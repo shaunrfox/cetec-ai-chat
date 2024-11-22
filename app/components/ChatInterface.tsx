@@ -1,5 +1,5 @@
 import { useState } from 'react';
-import { Sidebar } from './chat/Sidebar';
+import { ThreadsSidebar } from './ThreadsSidebar';
 import { MessageList } from './chat/MessageList';
 import { InputArea } from './chat/InputArea';
 import { useOpenAIAssistant } from "~/hooks/useOpenAIAssistant";
@@ -17,7 +17,7 @@ export function ChatInterface() {
 
   return (
     <div className="flex h-screen bg-background">
-      <Sidebar />
+      <ThreadsSidebar />
       
       <div className="flex-1 flex flex-col">
         <TopBar />

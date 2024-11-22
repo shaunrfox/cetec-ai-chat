@@ -4,7 +4,7 @@ interface Message {
   id: string;
   role: 'user' | 'assistant';
   content: string;
-  createdAt: string | Date;
+  createdAt: Date;
 }
 
 interface UseOpenAIAssistant {
@@ -14,33 +14,31 @@ interface UseOpenAIAssistant {
   submitMessage: (content: string) => Promise<void>;
 }
 
-export function useOpenAIAssistant(): UseOpenAIAssistant {
-  const [messages, setMessages] = useState<Message[]>([]);
+export function useOpenAIAssistant(initialMessages: Message[] = []): UseOpenAIAssistant {
+  const [messages, setMessages] = useState<Message[]>(initialMessages);
   const [status, setStatus] = useState<'idle' | 'in_progress'>('idle');
   const [error, setError] = useState<string | null>(null);
-  const [threadId, setThreadId] = useState<string | null>(null);
 
   const submitMessage = useCallback(async (content: string) => {
     setStatus('in_progress');
     setError(null);
 
-    // Add user message immediately
-    const userMessage = {
-      id: Date.now().toString(),
-      role: 'user' as const,
-      content,
-      createdAt: new Date()
-    };
-    setMessages(prev => [...prev, userMessage]);
-
     try {
+      // Add user message immediately
+      const userMessage = {
+        id: Date.now().toString(),
+        role: 'user' as const,
+        content,
+        createdAt: new Date()
+      };
+      
+      const updatedMessages = [...messages, userMessage];
+      setMessages(updatedMessages);
+
       const response = await fetch('/api/chat', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ 
-          messages: [...messages, userMessage],
-          threadId 
-        })
+        body: JSON.stringify({ messages: updatedMessages })
       });
 
       if (!response.ok) {
@@ -64,7 +62,6 @@ export function useOpenAIAssistant(): UseOpenAIAssistant {
             if (data.status) {
               setStatus(data.status === 'completed' ? 'idle' : 'in_progress');
             } else if (data.role === 'assistant') {
-              setThreadId(data.threadId);
               setMessages(prev => [...prev, {
                 id: data.id,
                 role: data.role,
@@ -80,7 +77,7 @@ export function useOpenAIAssistant(): UseOpenAIAssistant {
     } finally {
       setStatus('idle');
     }
-  }, [messages, threadId]);
+  }, [messages]);
 
   return { messages, status, error, submitMessage };
 }
