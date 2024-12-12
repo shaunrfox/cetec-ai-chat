@@ -35,6 +35,9 @@ export default function ChatThread() {
   const { thread } = useLoaderData<typeof loader>();
   const [input, setInput] = useState('');
   
+  // Add threadId to track changes
+  const threadId = thread.id;
+  
   // Convert thread messages to the format expected by useOpenAIAssistant
   const initialMessages = thread.messages?.map(msg => ({
     id: msg.id.toString(),
@@ -44,7 +47,8 @@ export default function ChatThread() {
     timestamp: new Date(msg.timestamp)
   })) || [];
 
-  const { messages, status, error, submitMessage } = useOpenAIAssistant(initialMessages);
+  // Pass threadId as a key to reset the hook's state when thread changes
+  const { messages, status, error, submitMessage } = useOpenAIAssistant(initialMessages, threadId);
 
   const onSubmit = async (input: string) => {
     if (!input.trim()) return;
@@ -52,24 +56,34 @@ export default function ChatThread() {
     setInput('');
   };
 
+  // Reset input when thread changes
+  useEffect(() => {
+    setInput('');
+  }, [threadId]);
+
   return (
-    <div className="flex h-screen bg-background">
-      <ThreadsSidebar />
-      
-      <div className="flex-1 flex flex-col">
-        <TopBar />
-        <MessageList 
-          messages={messages.length > 0 ? messages : initialMessages}
-          status={status}
-          error={error}
-        />
-        
-        <InputArea 
-          input={input}
-          setInput={setInput}
-          onSubmit={onSubmit}
-          status={status}
-        />
+    <div className="container mx-auto p-0">
+      <div className="flex flex-col h-screen bg-background">
+          <TopBar />
+
+        <div className="flex-1 flex">
+          <ThreadsSidebar />
+          
+          <div className="flex-1 flex flex-col">
+            <MessageList 
+              messages={messages} 
+              status={status} 
+              error={error} 
+            />
+            
+            <InputArea 
+              input={input}
+              setInput={setInput}
+              onSubmit={onSubmit}
+              status={status}
+            />
+          </div>
+        </div>
       </div>
     </div>
   );

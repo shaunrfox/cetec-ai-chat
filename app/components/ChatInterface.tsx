@@ -16,23 +16,26 @@ export function ChatInterface() {
   };
 
   return (
-    <div className="flex h-screen bg-background">
-      <ThreadsSidebar />
-      
-      <div className="flex-1 flex flex-col">
+    <div className="flex flex-col h-screen bg-background outline outline-gray-200">
         <TopBar />
-        <MessageList 
-          messages={messages} 
-          status={status} 
-          error={error} 
-        />
+
+      <div className="flex-1 flex">
+        <ThreadsSidebar />
         
-        <InputArea 
-          input={input}
-          setInput={setInput}
-          onSubmit={onSubmit}
-          status={status}
-        />
+        <div className="flex-1 flex flex-col">
+          <MessageList 
+            messages={messages} 
+            status={status} 
+            error={error} 
+          />
+          
+          <InputArea 
+            input={input}
+            setInput={setInput}
+            onSubmit={onSubmit}
+            status={status}
+          />
+        </div>
       </div>
     </div>
   );
